@@ -2,6 +2,8 @@ package co.zw.santech.stockservice.dto;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class StockDTO {
     private Integer productId;
@@ -12,4 +14,5 @@ public class StockDTO {
     private String category;
     private String narration;
     private Long quantity;
+    private BigDecimal price;
 }

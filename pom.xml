@@ -17,13 +17,11 @@
 		<java.version>1.8</java.version>
 	</properties>
 	<dependencies>
-
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-activemq-starter</artifactId>
 			<version>3.14.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-jackson</artifactId>
@@ -34,6 +32,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 			<version>2.6.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -53,7 +56,6 @@
 			<artifactId>camel-spring-boot-starter</artifactId>
 			<version>3.14.0</version>
 		</dependency>
-
 		<!--JSON DOC-->
 		<dependency>
 			<groupId>org.jsondoc</groupId>
@@ -81,7 +83,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -98,5 +99,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

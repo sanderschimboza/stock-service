@@ -2,16 +2,23 @@ package co.zw.santech.stockservice.controllers;
 
 import co.zw.santech.stockservice.dto.StockDTO;
 import co.zw.santech.stockservice.models.Stock;
+import co.zw.santech.stockservice.response.ErrorMessageResponse;
 import co.zw.santech.stockservice.services.StockService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsondoc.core.annotation.*;
 import org.jsondoc.core.pojo.ApiStage;
 import org.jsondoc.core.pojo.ApiVisibility;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,12 +32,16 @@ import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 @RequestMapping("/stock")
 public class StockController {
 
-    private
-    final StockService stockService;
+    DateFormat df = new SimpleDateFormat("yyyyMMdd");
+    String date = df.format(new Date());
+
+    private final StockService stockService;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public StockController(StockService stockService) {
+    public StockController(StockService stockService, ModelMapper modelMapper) {
         this.stockService = stockService;
+        this.modelMapper = modelMapper;
     }
 
     @RequestMapping(value = "/updateItem", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {MediaType.APPLICATION_JSON_VALUE})
@@ -41,28 +52,42 @@ public class StockController {
     })
     @ResponseStatus(HttpStatus.OK)
     @ApiResponseObject
-    public Stock updateStockItem(@RequestBody StockDTO stockDTO) {
+    public ResponseEntity<?> updateStockItem(@RequestBody StockDTO stockDTO) {
 
         Optional<Stock> stockPresent = stockService.findStockItemById(stockDTO.getProductId());
         if (stockPresent.isPresent()) {
-            stockPresent.get().setProductId(stockDTO.getProductId());
-            stockPresent.get().setProductName(stockDTO.getProductName());
-            stockPresent.get().setBarcode(stockDTO.getBarcode());
-            stockPresent.get().setQuantity(stockDTO.getQuantity());
-            stockPresent.get().setCategory(stockDTO.getCategory());
-            stockPresent.get().setNarration("STOCK EDITED");
+            BeanUtils.copyProperties(stockDTO, stockPresent.get());
+            stockPresent.get().setNarration(stockDTO.getNarration() + " -STOCK EDITED");
+            stockPresent.get().setDateAdded(date);
             stockPresent.get().setTotal(stockDTO.getQuantity() + stockPresent.get().getTotal());
 
             Integer httpResponse = this.stockService.
                     saveStockItem(stockPresent.get());
             if (httpResponse == 200) {
                 log.info("Stock Item was updated successfully -) {}", stockPresent);
+                return ResponseEntity.ok(modelMapper.map(stockPresent.get(), Stock.class));
             } else {
                 log.error("There was an error trying to update Stock Item! {}", stockPresent);
+                return new ResponseEntity<>(new ErrorMessageResponse(500, "Stock Update failed!",
+                        "There was an error trying to update Stock Item!", "/updateItem"), HttpStatus.BAD_REQUEST);
             }
-            return stockPresent.get();
+
         } else {
-            return null;
+            Stock stock = new Stock();
+            BeanUtils.copyProperties(stockDTO, stock);
+            stock.setDateAdded(date);
+            stock.setTotal(stockDTO.getQuantity());
+            Integer httSaveStockResponse = this.stockService.saveStockItem(stock);
+
+            if (httSaveStockResponse == 200) {
+                log.info("New Stock Item was Added successfully");
+                return ResponseEntity.ok(modelMapper.map(stock, Stock.class));
+            } else {
+                log.error("There was an error trying to save a new stock Item!");
+                return new ResponseEntity<>(new ErrorMessageResponse(500, "Stock Update failed!",
+                        "There was an error trying to save a new Stock Item!", "/updateItem"), HttpStatus.BAD_REQUEST);
+            }
+
         }
     }
 
