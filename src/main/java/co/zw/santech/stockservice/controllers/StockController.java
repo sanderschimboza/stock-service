@@ -77,9 +77,9 @@ public class StockController {
             BeanUtils.copyProperties(stockDTO, stock);
             stock.setDateAdded(date);
             stock.setTotal(stockDTO.getQuantity());
-            Integer httSaveStockResponse = this.stockService.saveStockItem(stock);
+            Integer httpSaveStockResponse = this.stockService.saveStockItem(stock);
 
-            if (httSaveStockResponse == 200) {
+            if (httpSaveStockResponse == 200) {
                 log.info("New Stock Item was Added successfully");
                 return ResponseEntity.ok(modelMapper.map(stock, Stock.class));
             } else {

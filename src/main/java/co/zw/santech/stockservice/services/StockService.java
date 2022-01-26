@@ -69,6 +69,7 @@ public class StockService {
                 order.setPrice(stockItem.get().getPrice());
                 order.setTotalPrice(stockItem.get().getPrice()
                         .multiply(BigDecimal.valueOf(order.getQuantity())));
+                stockItem.get().setTotal(stockItem.get().getTotal() - order.getQuantity());
                 sendMessageToQueue(order);
                 return 200;
 
